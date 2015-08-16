@@ -2,11 +2,20 @@ var context;
 var drawVisual;
 var canvas, canvasCtx;
 var visualSelect, analyser;
-
+var filterNode, low, mid, high;
+var buttons, file;
+var arr = {};
+arr['rock'] = [20, -10, 20];
+arr['pop'] = [0, 15, 0];
+arr['jazz'] = [-15, 10, 10];
+arr['classic'] = [-10, 10, -10];
+arr['none'] = [0, 0, 0];
 
 function stopSound() {
   if (source) {
     source.stop(0);
+    buttons[0].disabled = false;
+    buttons[1].disabled = true;
   }
 }
 
@@ -14,18 +23,22 @@ function playSound() {
   source = context.createBufferSource(); // Global so we can .noteOff() later.
   source.buffer = audioBuffer;
   source.loop = false;
-  source.connect(analyser);
+  source.connect(low);
+  low.connect(mid);
+  mid.connect(high);
+  high.connect(analyser);
   analyser.connect(context.destination);
-  source.start(0); 
-  console.log(source);
+  source.start(0);
   visualize();
+  buttons[0].disabled = true;
+  buttons[1].disabled = false;
 }
 
 function initSound(arrayBuffer) {
   context.decodeAudioData(arrayBuffer, function(buffer) {
     audioBuffer = buffer;
     console.log(audioBuffer);
-    var buttons = document.querySelectorAll('button');
+    buttons = document.querySelectorAll('button');
     buttons[0].disabled = false;
     buttons[1].disabled = false;
     console.log(buttons);
@@ -42,11 +55,10 @@ function dropEvent(evt) {
 
     var reader = new FileReader();
     reader.onload = function(e) {
-      console.log(droppedFiles[0]);
       initSound(e.target.result);
+      file.value = droppedFiles[0].name;
     };
     reader.readAsArrayBuffer(droppedFiles[0]);
-    
 }
 
 function dragOver(evt) {
@@ -55,65 +67,8 @@ function dragOver(evt) {
     return false;
 }
 
-window.addEventListener('load', init, false);
-function init() {
-	try {
-		window.AudioContext = window.AudioContext||window.webkitAudioContext;
-		context = new AudioContext();
-
-    visualSelect = document.getElementById("visual");
-    var file = document.getElementById('file');
-    var btnPlay = document.getElementById('play');
-    var btnStop = document.getElementById('stop');
-    var dropArea = document.getElementById('dropArea');
-
-    analyser = context.createAnalyser();
-    analyser.minDecibels = -90;
-    analyser.maxDecibels = -10;
-    analyser.smoothingTimeConstant = 0.85;
-
-    canvas = document.querySelector('.visualizer');
-    canvasCtx = canvas.getContext("2d");
-    console.log(canvasCtx);
-
-    var intendedWidth = document.querySelector('.wrapper').clientWidth;
-
-    canvas.setAttribute('width',intendedWidth);
-
-    visualSelect = document.getElementById("visual");
-
-    var drawVisual;
-
-    file.addEventListener('change', function(e) {  
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        initSound(e.target.result);
-      };
-      reader.readAsArrayBuffer(e.target.files[0]);
-    }, false);
-
-    btnPlay.addEventListener('click', function(e) {  
-      playSound();
-    }, false);
-
-    btnStop.addEventListener('click', function(e) {  
-      stopSound();
-    }, false);
-
-    dropArea.addEventListener('drop', dropEvent, false);
-    dropArea.addEventListener('dragover', dragOver, false);
-		
-    
-	}
-	catch(e) {
-		alert('Web Audio API is not supported in this browser');
-		alert(e);
-	}
-}
-
-
 function visualize() {
-  WIDTH = canvas.width;
+  WIDTH = canvas.width - 10;
   HEIGHT = canvas.height;
 
   analyser.fftSize = 1024;
@@ -129,7 +84,7 @@ function visualize() {
 
     analyser.getFloatTimeDomainData(dataArray);
 
-    canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+    canvasCtx.fillStyle = '#ebebeb';
     canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
     canvasCtx.lineWidth = 2;
@@ -154,12 +109,89 @@ function visualize() {
       x += sliceWidth;
     }
 
-    canvasCtx.lineTo(canvas.width, canvas.height/2);
+    canvasCtx.lineTo(canvas.width-10, canvas.height/2);
     canvasCtx.stroke();
   };
 
   draw();
-
-  
-
 }
+
+function changeFilter (filterType){
+  values = arr[filterType];
+  low.gain.value = values[0];
+  mid.gain.value = values[1];
+  high.gain.value = values[2];
+}
+
+function init() {
+	try {
+		window.AudioContext = window.AudioContext||window.webkitAudioContext;
+		context = new AudioContext();
+
+    visualSelect = document.getElementById('visual');
+    file = document.getElementById('file');
+    var btnPlay = document.getElementById('play');
+    var btnStop = document.getElementById('stop');
+    var dropArea = document.getElementById('dropArea');
+    var drawVisual;
+    var equalizer = document.getElementById('equalizer');
+
+    low = context.createBiquadFilter();
+    low.type = 'lowshelf';
+    low.frequency.value = 320.0;
+    low.Q.value = 0.0;
+
+    mid = context.createBiquadFilter();
+    mid.type = 'peaking';
+    mid.frequency.value = 1000.0;
+    mid.Q.value = 0.0;
+
+    high = context.createBiquadFilter();
+    high.type = 'highshelf';
+    high.frequency.value = 3200.0;
+    high.Q.value = 0.0;
+
+
+    //analyser for vizualization
+    analyser = context.createAnalyser();
+    analyser.minDecibels = -90;
+    analyser.maxDecibels = -10;
+    analyser.smoothingTimeConstant = 0.85;
+
+    canvas = document.querySelector('.visualizer');
+    canvasCtx = canvas.getContext("2d");
+
+    var intendedWidth = document.querySelector('.wrapper').clientWidth;
+
+    canvas.setAttribute('width',intendedWidth);
+
+    file.addEventListener('change', function(e) {  
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        initSound(e.target.result);
+      };
+      reader.readAsArrayBuffer(e.target.files[0]);
+    }, false);
+
+    equalizer.addEventListener('change', function(e) {  
+      changeFilter(equalizer.value);
+    }, false);
+
+    btnPlay.addEventListener('click', function(e) {  
+      playSound();
+    }, false);
+
+    btnStop.addEventListener('click', function(e) {  
+      stopSound();
+    }, false);
+
+    dropArea.addEventListener('drop', dropEvent, false);
+    dropArea.addEventListener('dragover', dragOver, false);
+	}
+	catch(e) {
+		alert('Web Audio API is not supported in this browser');
+		alert(e);
+	}
+}
+
+window.addEventListener('load', init, false);
