@@ -58,6 +58,7 @@ function dropEvent(evt) {
       fileName.innerHTML = droppedFiles[0].name;
     };
     reader.readAsArrayBuffer(droppedFiles[0]);
+    printMeta(droppedFiles[0]);
 }
 
 function dragOver(evt) {
@@ -121,7 +122,13 @@ function changeFilter (filterType){
   mid.gain.value = values[1];
   high.gain.value = values[2];
 }
-
+function printMeta (file) {
+  id3(file, function(err, tags) {
+    console.log(tags);
+    var meta = document.getElementById('meta');
+    meta.innerHTML = tags.artist+': '+tags.title;
+  });
+}
 function init() {
 	try {
 		window.AudioContext = window.AudioContext||window.webkitAudioContext;
@@ -171,6 +178,8 @@ function init() {
       };
       fileName.innerHTML = e.target.files[0].name;
       reader.readAsArrayBuffer(e.target.files[0]);
+
+      printMeta(e.target.files[0]);
     }, false);
 
     equalizer.addEventListener('change', function(e) {  
