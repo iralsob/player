@@ -3,7 +3,7 @@ var drawVisual;
 var canvas, canvasCtx;
 var visualSelect, analyser;
 var filterNode, low, mid, high;
-var buttons, file;
+var buttons, file, fileName;
 var arr = {};
 arr['rock'] = [20, -10, 20];
 arr['pop'] = [0, 15, 0];
@@ -41,7 +41,6 @@ function initSound(arrayBuffer) {
     buttons = document.querySelectorAll('button');
     buttons[0].disabled = false;
     buttons[1].disabled = false;
-    console.log(buttons);
   }, function(e) {
     console.log('Error decoding', e);
   }); 
@@ -56,7 +55,7 @@ function dropEvent(evt) {
     var reader = new FileReader();
     reader.onload = function(e) {
       initSound(e.target.result);
-      file.value = droppedFiles[0].name;
+      fileName.innerHTML = droppedFiles[0].name;
     };
     reader.readAsArrayBuffer(droppedFiles[0]);
 }
@@ -133,8 +132,8 @@ function init() {
     var btnPlay = document.getElementById('play');
     var btnStop = document.getElementById('stop');
     var dropArea = document.getElementById('dropArea');
-    var drawVisual;
     var equalizer = document.getElementById('equalizer');
+    fileName = document.getElementById('fileName');
 
     low = context.createBiquadFilter();
     low.type = 'lowshelf';
@@ -170,6 +169,7 @@ function init() {
       reader.onload = function(e) {
         initSound(e.target.result);
       };
+      fileName.innerHTML = e.target.files[0].name;
       reader.readAsArrayBuffer(e.target.files[0]);
     }, false);
 

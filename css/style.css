@@ -1,6 +1,11 @@
-input[type='file']{
-	display: block;
-    width: 100%;
+label{
+    cursor: pointer;
+}
+#fileName {
+	display: inline-block;
+}
+input[type='file'] {
+	display: none;
 }
 .wrapper {
 	width: 50%;

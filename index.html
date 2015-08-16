@@ -9,7 +9,11 @@
 	</head>
 	<body>
 		<div class="wrapper" id="dropArea">
-			<input type="file" id="file" accept="audio/*" width="100%">
+			<div>
+				<input type="file" id="file" accept="audio/*" width="100%">
+				<label for="file">Выбрать файл: </label>
+				<div id="fileName"></div>
+			</div>
 			<button id="play" disabled>Start</button>
 			<button id="stop" disabled>Stop</button>
 			<select name="equalizer" id="equalizer">
