@@ -1,0 +1,10 @@
+input[type='file']{
+	display: block;
+    width: 100%;
+}
+.wrapper {
+	width: 50%;
+	border: 3px solid #ebebeb;
+	padding: 5px;
+	min-width: 650px;
+}

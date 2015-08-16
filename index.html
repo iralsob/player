@@ -5,56 +5,21 @@
 		<meta charset="utf-8">
 		<title>плеер</title>
 		<script src="script.js"></script>
-		<style>
-			body {
-				font-size: 0;
-			}
-			#dropArea{
-				display: block;
-				height: 300px;
-				width: 100%;
-				vertical-align: top;
-				background: #ccc;
-			}
-			.aside,
-			.content {
-				width: 30%;
-				display: inline-block;
-				vertical-align: top;
-				font-size: 13px;
-			}
-			.content {
-				width: 70%;
-			}
-
-		</style>
+		<link href="css/style.css" rel="stylesheet">
 	</head>
 	<body>
-		<div class="wrapper">
-			
-		
-		<div class="aside">
-			<input type="file" id="file" accept="audio/*">			
-			<div id="dropArea">	Перетащите сюда файл для загрузки
-			</div>
-			<input type="radio" name="type" id="pop">
-			<input type="radio" name="type" id="rock">
-			<input type="radio" name="type" id="jazz">
-			<input type="radio" name="type" id="classic">
-			<input type="radio" name="type" id="normal">
-		</div>
-		<div class="content">
+		<div class="wrapper" id="dropArea">
+			<input type="file" id="file" accept="audio/*" width="100%">
 			<button id="play" disabled>Start</button>
 			<button id="stop" disabled>Stop</button>
-			<div id="fileName"></div>
-			<div id="fileArtist"></div>
-		</div>
-		<canvas class="visualizer" width="650" height="100" id="visualizer"></canvas>
-		<select id="visual" name="visual">
-          <option value="sinewave">Sinewave</option>
-          <option value="frequencybars" selected="">Frequency bars</option>
-          <option value="off">Off</option>
-        </select>
+			<select name="equalizer" id="equalizer">
+				<option value="pop">Поп</option>
+				<option value="rock">Рок</option>
+				<option value="jazz">Джаз</option>
+				<option value="classic">Классика</option>
+				<option value="none">Обычный</option>
+			</select>
+			<canvas class="visualizer" width="650" height="300" id="visualizer"></canvas>
         </div>
 	</body>
 </html>
